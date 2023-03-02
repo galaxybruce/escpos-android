@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +31,7 @@ import com.jumperchuck.escpos.printer.PrintResult;
 import com.jumperchuck.escpos.scanner.DeviceScanner;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -71,9 +73,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onScanned(List<Object> devices) {
+            Object[] devices1 = devices.stream().filter(item-> {
+                if (item instanceof InetAddress) {
+                    return !TextUtils.isEmpty(((InetAddress) item).getHostName());
+                } else if (item instanceof BluetoothDevice) {
+                    return !TextUtils.isEmpty(((BluetoothDevice) item).getName());
+                }
+                return false;
+            }).toArray();
             alertBuilder.setMessage(null);
             alertBuilder.setSingleChoiceItems(
-                devices.stream()
+                    Arrays.stream(devices1)
                     .map(item -> {
                         if (item instanceof InetAddress) {
                             return ((InetAddress) item).getHostName() + " / " +
@@ -90,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Object item = devices.get(i);
+                        Object item = devices1[i];
                         if (item instanceof InetAddress) {
                             showInputTcpPrinter(((InetAddress) item).getHostAddress(), "9100");
                         } else if (item instanceof BluetoothDevice) {
@@ -299,23 +309,23 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if (printer == null) return;
                 Paper paper = new Paper();
-                paper.addAlign(AlignType.LEFT);
-                paper.addText("打印图片");
-                paper.addImage(BitmapFactory.decodeResource(getResources(), R.drawable.printer));
-                paper.addCutPaper();
+//                paper.addAlign(AlignType.LEFT);
+//                paper.addText("打印图片");
+//                paper.addImage(BitmapFactory.decodeResource(getResources(), R.drawable.printer));
+//                paper.addCutPaper();
                 paper.addAlign(AlignType.CENTER);
                 paper.addText("打印HTML");
                 paper.addHtml(ResourceUtils.readRaw2String(R.raw.html));
                 paper.addCutPaper();
-                paper.addAlign(AlignType.RIGHT);
-                paper.addText("打印二维码");
-                paper.addQRCode("http://www.baidu.com", (byte) 3, ErrorLevel.H);
-                paper.addAlign(AlignType.CENTER);
-                paper.addText("打印一维码");
-                paper.addBarcode("3123040", BarcodeType.CODABAR, (byte) 40, (byte) 2, HriPosition.NONE);
-                paper.addCutPaper();
-                paper.addBeep((byte) 3, (byte) 1000);
-                paper.addOpenDrawer();
+//                paper.addAlign(AlignType.RIGHT);
+//                paper.addText("打印二维码");
+//                paper.addQRCode("http://www.baidu.com", (byte) 3, ErrorLevel.H);
+//                paper.addAlign(AlignType.CENTER);
+//                paper.addText("打印一维码");
+//                paper.addBarcode("3123040", BarcodeType.CODABAR, (byte) 40, (byte) 2, HriPosition.NONE);
+//                paper.addCutPaper();
+//                paper.addBeep((byte) 3, (byte) 1000);
+//                paper.addOpenDrawer();
                 PrintResult result = printer.print(paper);
                 // printer.disconnect();
                 ToastUtils.showLong("已发送: " + result.isSent() + " 数据大小: " + result.getTotalBytes());

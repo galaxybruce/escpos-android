@@ -49,13 +49,18 @@ public class EscCommander implements PrinterCommander {
         public void run() {
             try {
                 while (!isInterrupted()) {
-                    // 读取打印机返回信息,打印机没有返回值返回-1
+                    // 读取打印机返回信息,打印机没有返回值返回-1，这个会一直阻塞，直到有数据返回，
+                    // 每发一次读取状态命令，才会有数据返回
                     int len = connection.readData(buffer);
                     LogUtils.d("READ", len + " / " + buffer[0]);
                     int result = judgeResponseType(buffer[0]);
                     if (result == 0) {
                         // 打印机缓冲区打印完成
+                        // https://escpos.readthedocs.io/en/latest/info.html
                         if (len < 0) {
+                            currentStatus = PrinterStatus.NORMAL;
+                        } else if (buffer[0] == 0) {
+                            // 纸将尽
                             currentStatus = PrinterStatus.NORMAL;
                         } else if ((buffer[0] & 0x03) > 0) {
                             // 纸将尽
@@ -64,7 +69,7 @@ public class EscCommander implements PrinterCommander {
                             // 缺纸
                             currentStatus = PrinterStatus.PAPER_OUT;
                         } else {
-                            currentStatus = PrinterStatus.ERROR;
+                            currentStatus = PrinterStatus.UNKNOWN_ERROR;
                         }
                     } else {
                         // 实时状态
@@ -280,10 +285,16 @@ public class EscCommander implements PrinterCommander {
             Vector<Byte> data = command.getCommand();
             connection.writeData(data);
             // 一票一控，发送缓冲区打印完成查询指令
+            LogUtils.i("READ", "start readStatus ...");
             connection.writeData(new byte[]{0x1D, 0x72, 0x01});
             currentStatus = null;
             // 设置等待时间
-            ReadUtils.readSync(() -> currentStatus, 4000);
+            long s = System.currentTimeMillis();
+            ReadUtils.readSync(() -> currentStatus, 30000);
+            if(currentStatus != null) {
+                LogUtils.i("READ", "status response: time spent: " + (System.currentTimeMillis() - s)
+                        + "; status value: " + currentStatus.getMessage());
+            }
             return data.size();
         }
     }
