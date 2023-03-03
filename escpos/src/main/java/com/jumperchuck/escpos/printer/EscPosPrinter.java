@@ -2,8 +2,6 @@ package com.jumperchuck.escpos.printer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.webkit.WebView;
 
 import com.jumperchuck.escpos.command.FactoryCommander;
 import com.jumperchuck.escpos.command.PrinterCommander;
@@ -11,11 +9,22 @@ import com.jumperchuck.escpos.connection.PrinterConnection;
 import com.jumperchuck.escpos.constant.ConnectType;
 import com.jumperchuck.escpos.constant.PrintWidth;
 import com.jumperchuck.escpos.constant.PrinterStatus;
-import com.jumperchuck.escpos.util.HtmlUtils;
 
 import java.io.IOException;
 import java.util.Vector;
 
+/**
+ * @date 2023/3/3 17:14
+ * @author bruce.zhang
+ * @description
+ *
+ * 一个完整的打印机包括两个主要部分：Connection 和 Command
+ * 理论上Connection 和 Command可以随意组合成一个打印机。
+ * 但也有例外，比如商米打印机，Connection 和 Command必须是匹配的。
+ *
+ * <p>
+ * modification history:
+ */
 public abstract class EscPosPrinter extends PrinterConnection {
     protected int id;
 

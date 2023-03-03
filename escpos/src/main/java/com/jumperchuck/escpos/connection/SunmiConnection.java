@@ -12,36 +12,29 @@ import java.io.IOException;
 import java.util.Vector;
 
 public class SunmiConnection extends PrinterConnection {
-    private static SunmiPrinterService service;
+    private SunmiPrinterService service;
+    private Context context;
 
-    private static InnerPrinterCallback callback = new InnerPrinterCallback() {
+    private final InnerPrinterCallback callback = new InnerPrinterCallback() {
         @Override
         protected void onConnected(SunmiPrinterService service) {
-            SunmiConnection.service = service;
+            SunmiConnection.this.service = service;
         }
 
         @Override
         protected void onDisconnected() {
-            SunmiConnection.service = null;
+            SunmiConnection.this.service = null;
         }
     };
 
-    public static void init(Context context) {
-        try {
-            InnerPrinterManager.getInstance().bindService(context, callback);
-        } catch (InnerPrinterException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static SunmiPrinterService getService() {
+    public SunmiPrinterService getService() {
         return service;
     }
 
     private boolean isConnect;
 
     public SunmiConnection(Context context) {
-
+        this.context = context;
     }
 
     @Override
@@ -51,12 +44,22 @@ public class SunmiConnection extends PrinterConnection {
 
     @Override
     public void connect() {
+        try {
+            InnerPrinterManager.getInstance().bindService(context, callback);
+        } catch (InnerPrinterException e) {
+            e.printStackTrace();
+        }
         isConnect = true;
     }
 
     @Override
     public void disconnect() {
         isConnect = false;
+        try {
+            InnerPrinterManager.getInstance().unBindService(context, callback);
+        } catch (InnerPrinterException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

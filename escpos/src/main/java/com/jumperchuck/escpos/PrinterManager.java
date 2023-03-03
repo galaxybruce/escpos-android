@@ -10,7 +10,6 @@ import com.jumperchuck.escpos.connection.SunmiConnection;
 import com.jumperchuck.escpos.connection.TcpConnection;
 import com.jumperchuck.escpos.connection.UsbConnection;
 import com.jumperchuck.escpos.printer.GeneralPrinter;
-import com.jumperchuck.escpos.printer.SunmiPrinter;
 import com.jumperchuck.escpos.scanner.BluetoothScanner;
 import com.jumperchuck.escpos.scanner.WlanScanner;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
@@ -22,7 +21,7 @@ public class PrinterManager {
 
     public static void init(Context ctx) {
         PrinterManager.context = ctx.getApplicationContext();
-        SunmiConnection.init(context);
+//        SunmiConnection.init(context);
     }
 
     public static GeneralPrinter.Builder bluetoothPrinter(String macAddress) {
@@ -44,10 +43,6 @@ public class PrinterManager {
         return new GeneralPrinter.Builder(context)
             .connection(new SunmiConnection(context))
             .commander(new SunmiCommander());
-    }
-
-    public static SunmiPrinterService sunmiService() {
-        return SunmiConnection.getService();
     }
 
     public static BluetoothScanner.Builder bluetoothScanner() {

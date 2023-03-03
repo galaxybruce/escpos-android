@@ -19,15 +19,21 @@ import java.util.List;
 public class SunmiCommander implements PrinterCommander {
     @Override
     public Reader createReader(PrinterConnection connection) {
-        return new Reader();
+        return new Reader(connection);
     }
 
     @Override
     public Sender createSender(PrinterConnection connection) {
-        return new Sender();
+        return new Sender(connection);
     }
 
     public static class Reader implements PrinterCommander.Reader {
+        private PrinterConnection connection;
+
+        public Reader(PrinterConnection connection) {
+            this.connection = connection;
+        }
+
         @Override
         public void startRead() {
 
@@ -40,7 +46,10 @@ public class SunmiCommander implements PrinterCommander {
 
         @Override
         public PrinterStatus updateStatus(int soTimeout) throws IOException {
-            SunmiPrinterService service = SunmiConnection.getService();
+            if(!(connection instanceof SunmiConnection)) {
+                return PrinterStatus.DISCONNECTED;
+            }
+            SunmiPrinterService service = ((SunmiConnection)connection).getService();
             if (service == null) {
                 return PrinterStatus.DISCONNECTED;
             }
@@ -80,9 +89,11 @@ public class SunmiCommander implements PrinterCommander {
     }
 
     public static class Sender implements PrinterCommander.Sender {
+        private PrinterConnection connection;
         private List<Task> tasks;
 
-        public Sender() {
+        public Sender(PrinterConnection connection) {
+            this.connection = connection;
             this.tasks = new ArrayList<>();
         }
 
@@ -250,7 +261,10 @@ public class SunmiCommander implements PrinterCommander {
 
         @Override
         public int startSend() throws IOException {
-            SunmiPrinterService service = SunmiConnection.getService();
+            if(!(connection instanceof SunmiConnection)) {
+                return 0;
+            }
+            SunmiPrinterService service = ((SunmiConnection)connection).getService();
             if (service == null) {
                 return 0;
             }

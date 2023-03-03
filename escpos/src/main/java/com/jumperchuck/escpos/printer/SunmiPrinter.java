@@ -1,32 +1,59 @@
 package com.jumperchuck.escpos.printer;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.RemoteException;
-import android.util.Base64;
 
-import com.jumperchuck.escpos.connection.SunmiConnection;
+import com.jumperchuck.escpos.command.PrinterCommander;
 import com.jumperchuck.escpos.constant.PrinterStatus;
-import com.jumperchuck.escpos.util.HtmlUtils;
-import com.sunmi.peripheral.printer.SunmiPrinterService;
+
+import java.io.IOException;
 
 /**
  * 商米内置打印机
  */
 public class SunmiPrinter extends EscPosPrinter {
+
+    private PrinterCommander.Reader reader;
+
     private SunmiPrinter(Builder builder) {
         super(builder);
     }
 
     @Override
     public void connect() {
-
+        if (isConnected()) {
+            return;
+        }
+        sendStatusBroadcast(PrinterStatus.CONNECTING);
+        connection.connect();
+        if (isConnected()) {
+            // 开启读取打印机返回数据线程
+            reader = commander.createReader(this);
+            reader.startRead();
+            sendStatusBroadcast(PrinterStatus.CONNECTED);
+        } else {
+            // 连接失败, 重连一次
+            connection.connect();
+            if (isConnected()) {
+                // 开启读取打印机返回数据线程
+                reader = commander.createReader(this);
+                reader.startRead();
+                sendStatusBroadcast(PrinterStatus.CONNECTED);
+            } else {
+                sendStatusBroadcast(PrinterStatus.CONNECT_TIMEOUT);
+            }
+        }
     }
 
     @Override
     public void disconnect() {
-
+        if (reader != null) {
+            reader.cancelRead();
+            reader = null;
+        }
+        if (isConnected()) {
+            sendStatusBroadcast(PrinterStatus.DISCONNECTED);
+        }
+        connection.disconnect();
     }
 
     @Override
@@ -36,7 +63,17 @@ public class SunmiPrinter extends EscPosPrinter {
 
     @Override
     public PrinterStatus getPrinterStatus() {
-        return null;
+        if (!isConnected() || reader == null) {
+            return PrinterStatus.DISCONNECTED;
+        }
+        PrinterStatus status = PrinterStatus.UNKNOWN_ERROR;
+        try {
+            status = reader.updateStatus(soTimeout);
+        } catch (IOException e) {
+            status = PrinterStatus.DISCONNECTED;
+        }
+        sendStatusBroadcast(status);
+        return status;
     }
 
     public static class Builder extends EscPosPrinter.Builder<Builder> {
