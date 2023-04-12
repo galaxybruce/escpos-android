@@ -1,13 +1,10 @@
 package com.jumperchuck.escpos;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,22 +14,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.blankj.utilcode.util.ResourceUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.jumperchuck.escpos.constant.AlignType;
-import com.jumperchuck.escpos.constant.BarcodeType;
-import com.jumperchuck.escpos.constant.ErrorLevel;
-import com.jumperchuck.escpos.constant.HriPosition;
 import com.jumperchuck.escpos.constant.PrintWidth;
 import com.jumperchuck.escpos.constant.PrinterStatus;
-import com.jumperchuck.escpos.printer.Paper;
 import com.jumperchuck.escpos.printer.EscPosPrinter;
+import com.jumperchuck.escpos.printer.Paper;
 import com.jumperchuck.escpos.printer.PrintResult;
 import com.jumperchuck.escpos.scanner.DeviceScanner;
 
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvPrinterStatus;
     private TextView tvPrinterConnected;
     private Button btSelectBluetooth;
+    private TextView btLastPrinter;
     private Button btSelectWlan;
     private Button btSelectSunmi;
     private Button btStatus;
@@ -51,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog.Builder alertBuilder;
     private EscPosPrinter printer;
     private DeviceScanner scanner;
+
+    private String lastBluePrinterName;
+    private String lastBluePrinterAddress;
+
     private DeviceScanner.Listener scannerListener = new DeviceScanner.Listener() {
         @Override
         public void onStarted() {
@@ -107,6 +109,14 @@ public class MainActivity extends AppCompatActivity {
                             String name = ((BluetoothDevice) item).getName();
                             String address = ((BluetoothDevice) item).getAddress();
                             initPrinter(PrinterManager.bluetoothPrinter(address).name(name + " / " + address));
+                            lastBluePrinterName = name;
+                            lastBluePrinterAddress = address;
+
+                            SharedPreferences sharedPreferences= getSharedPreferences("blue_printer", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("name", name);
+                            editor.putString("address", address);
+                            editor.apply();
                         }
                         alertDialog.cancel();
                     }
@@ -134,12 +144,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences sharedPreferences= getSharedPreferences("blue_printer", Context.MODE_PRIVATE);
+        lastBluePrinterName = sharedPreferences.getString("name","");
+        lastBluePrinterAddress = sharedPreferences.getString("address","");
+
         tvPrinterInfo = findViewById(R.id.tv_printer_info);
         tvPrinterStatus = findViewById(R.id.tv_printer_status);
         tvPrinterConnected = findViewById(R.id.tv_printer_connected);
         btStatus = findViewById(R.id.bt_status);
         btPrint = findViewById(R.id.bt_print);
         btSelectBluetooth = findViewById(R.id.bt_select_bluetooth);
+        btLastPrinter = findViewById(R.id.bt_last_bluetooth);
         btSelectWlan = findViewById(R.id.bt_select_wlan);
         btSelectSunmi = findViewById(R.id.bt_select_sunmi);
 
@@ -147,6 +162,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showSelectBluetoothPrinter();
+            }
+        });
+        btLastPrinter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = lastBluePrinterName;
+                String address = lastBluePrinterAddress;
+                initPrinter(PrinterManager.bluetoothPrinter(address).name(name + " / " + address));
             }
         });
         btSelectWlan.setOnClickListener(new View.OnClickListener() {
@@ -314,8 +337,13 @@ public class MainActivity extends AppCompatActivity {
 //                paper.addImage(BitmapFactory.decodeResource(getResources(), R.drawable.printer));
 //                paper.addCutPaper();
                 paper.addAlign(AlignType.CENTER);
-                paper.addText("打印HTML");
-                paper.addHtml(ResourceUtils.readRaw2String(R.raw.html));
+                paper.addText("打印HTML 1");
+                paper.addText("打印HTML 2");
+                paper.addText("打印HTML 3");
+                paper.addText("打印HTML 4");
+                paper.addText("打印HTML 5");
+                paper.addText("打印HTML 6");
+//                paper.addHtml(ResourceUtils.readRaw2String(R.raw.html));
                 paper.addCutPaper();
 //                paper.addAlign(AlignType.RIGHT);
 //                paper.addText("打印二维码");

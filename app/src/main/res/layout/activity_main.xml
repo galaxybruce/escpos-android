@@ -58,6 +58,13 @@
         android:text="选择蓝牙打印机" />
 
     <Button
+        android:id="@+id/bt_last_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="使用上次打印机" />
+
+    <Button
         android:id="@+id/bt_select_wlan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
