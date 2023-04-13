@@ -3,6 +3,7 @@ package com.jumperchuck.escpos.connection;
 import android.content.Context;
 
 import com.jumperchuck.escpos.constant.ConnectType;
+import com.jumperchuck.escpos.util.ReadUtils;
 import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterException;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
@@ -12,22 +13,22 @@ import java.io.IOException;
 import java.util.Vector;
 
 public class SunmiConnection extends PrinterConnection {
-    private SunmiPrinterService service;
+    private static SunmiPrinterService service;
     private Context context;
 
-    private final InnerPrinterCallback callback = new InnerPrinterCallback() {
+    private static final InnerPrinterCallback callback = new InnerPrinterCallback() {
         @Override
         protected void onConnected(SunmiPrinterService service) {
-            SunmiConnection.this.service = service;
+            SunmiConnection.service = service;
         }
 
         @Override
         protected void onDisconnected() {
-            SunmiConnection.this.service = null;
+            SunmiConnection.service = null;
         }
     };
 
-    public SunmiPrinterService getService() {
+    public static SunmiPrinterService getService() {
         return service;
     }
 
@@ -46,6 +47,8 @@ public class SunmiConnection extends PrinterConnection {
     public void connect() {
         try {
             InnerPrinterManager.getInstance().bindService(context, callback);
+            // 商米连接是异步的，等待几秒钟再检查
+            ReadUtils.readSync(SunmiConnection::getService, timeout);
         } catch (InnerPrinterException e) {
             e.printStackTrace();
         }

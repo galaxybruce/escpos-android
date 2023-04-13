@@ -16,16 +16,11 @@ public class TcpConnection extends PrinterConnection {
     private Socket socket;
     private String ip;
     private int port;
-    private int timeout = 4000;
     private int soTimeout = 0;
 
     public TcpConnection(String ip, int port) {
         this.ip = ip;
         this.port = port;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 
     public void setSoTimeout(int soTimeout) {

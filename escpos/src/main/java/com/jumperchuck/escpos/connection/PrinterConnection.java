@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 public abstract class PrinterConnection {
+
     public abstract ConnectType connectType();
 
     public abstract void connect();
@@ -42,5 +43,14 @@ public abstract class PrinterConnection {
             vectorByte.add(Byte.valueOf(data[i]));
         }
         return vectorByte;
+    }
+
+    /**
+     * 连接超时时间
+     */
+    protected int timeout = 4000;
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }

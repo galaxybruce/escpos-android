@@ -12,7 +12,6 @@ import com.jumperchuck.escpos.connection.UsbConnection;
 import com.jumperchuck.escpos.printer.GeneralPrinter;
 import com.jumperchuck.escpos.scanner.BluetoothScanner;
 import com.jumperchuck.escpos.scanner.WlanScanner;
-import com.sunmi.peripheral.printer.SunmiPrinterService;
 
 public class PrinterManager {
 

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.util.Base64;
 
 import com.jumperchuck.escpos.command.PrinterCommander;
-import com.jumperchuck.escpos.connection.TcpConnection;
 import com.jumperchuck.escpos.constant.AlignType;
 import com.jumperchuck.escpos.constant.BarcodeType;
 import com.jumperchuck.escpos.constant.ErrorLevel;
@@ -33,9 +32,7 @@ public class GeneralPrinter extends EscPosPrinter {
         if (isConnected()) {
             return;
         }
-        if (connection instanceof TcpConnection) {
-            ((TcpConnection) connection).setTimeout(timeout);
-        }
+        connection.setTimeout(timeout);
         sendStatusBroadcast(PrinterStatus.CONNECTING);
         connection.connect();
         if (isConnected()) {
