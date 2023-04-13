@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String name = lastBluePrinterName;
+                // 商米内置address "00:11:22:33:44:55"
                 String address = lastBluePrinterAddress;
                 initPrinter(PrinterManager.bluetoothPrinter(address).name(name + " / " + address));
             }
