@@ -8,7 +8,7 @@ public class ReadUtils {
     public static <T> T readSync(Getter<T> getter, int timeout) {
         try {
             long startTime = System.currentTimeMillis();
-            long currentTime = System.currentTimeMillis();
+            long currentTime = startTime;
             while (currentTime - startTime < timeout) {
                 if (getter.invoke() != null) {
                     return getter.invoke();
